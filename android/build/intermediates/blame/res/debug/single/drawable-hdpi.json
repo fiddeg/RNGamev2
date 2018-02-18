@@ -1,5 +1,9 @@
 [
     {
+        "merged": "C:\\Users\\lwh\\StudioProjects\\V2\\RNGamev2\\android\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi\\ic_launcher.png",
+        "source": "C:\\Users\\lwh\\StudioProjects\\V2\\RNGamev2\\android\\res\\drawable-hdpi\\ic_launcher.png"
+    },
+    {
         "merged": "C:\\Users\\fidde\\OneDrive\\Dokument\\DA270A\\Projekt\\android\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi\\ic_launcher.png",
         "source": "C:\\Users\\fidde\\OneDrive\\Dokument\\DA270A\\Projekt\\android\\res\\drawable-hdpi\\ic_launcher.png"
     }

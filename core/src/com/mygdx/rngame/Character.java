@@ -12,6 +12,6 @@ public class Character extends Figure{
 
     public void updatePositionFromSpeed(float delta){
         super.updatePositionFromSpeed();
-        stopAtEdge();
+        bounceAtEdge();
     }
 }
