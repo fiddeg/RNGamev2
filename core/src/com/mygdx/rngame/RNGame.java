@@ -16,7 +16,6 @@ public class RNGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture backImg;
 
-
 	//Använde dessa till testing, händigare än logcat IMHO.
 	private BitmapFont font;
 	String highScore = "Highscore is: "+"9001";

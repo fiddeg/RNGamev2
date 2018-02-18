@@ -100,9 +100,6 @@ public class Figure {
 
         setX(getX() + getSpeedX());
         setY(getY() + getSpeedY());
-
-
-
     }
 
     public void draw(SpriteBatch batch) {
