@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.ArrayList;
 
 
 public class RNGame extends ApplicationAdapter {
@@ -15,6 +16,8 @@ public class RNGame extends ApplicationAdapter {
 	private Character character;
 	SpriteBatch batch;
 	Texture backImg;
+	LevelCreator levelCreator;
+	ArrayList<GameObject> gameObjects;
 
 	//Använde dessa till testing, händigare än logcat IMHO.
 	private BitmapFont font;
@@ -25,7 +28,9 @@ public class RNGame extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 		backImg = new Texture("parallax background.png");
-		character = new Character("character_idle_0.png", 0,0, 150,150);
+		levelCreator= new LevelCreator();
+		levelCreator.generateObjects();
+		character = levelCreator.getCharacter();
 
 		font = new BitmapFont();
 		font.setColor(Color.FIREBRICK);
@@ -36,11 +41,13 @@ public class RNGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		checkInput();
-		character.updatePositionFromSpeed(Gdx.graphics.getDeltaTime());
+
+		character.updatePositionFromSpeed();
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 		batch.draw(backImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
 		character.draw(batch);
 		font.draw(batch, highScore, 0, Gdx.graphics.getHeight());
 
@@ -53,6 +60,7 @@ public class RNGame extends ApplicationAdapter {
 
 		if (Gdx.input.justTouched()){
 			//magic happens?
+
 		}
 
 		//Kollar sensorn och avgör hastigheten i X-led därefter. tiltTrigger används som gränsvärde för att kunna stå stilla.

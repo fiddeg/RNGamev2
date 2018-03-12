@@ -10,63 +10,20 @@ import com.badlogic.gdx.math.Rectangle;
  * Created by Fidde on 2018-02-17.
  */
 
-public class Figure {
+public class Figure extends GameObject{
     private float speedX = 0;
     private float speedY = 0;
     private Sprite sprite;
     private final int SHRINK_COLLISION_RADIUS_X;
     private final int SHRINK_COLLISION_RADIUS_Y;
-    private boolean jumping = false;
+
 
     public Figure(String textureFileName, float x, float y, int sizeX, int sizeY) {
-        sprite = new Sprite(new Texture(textureFileName));
-        sprite.setSize(sizeX, sizeY);
-        sprite.setX(x);
-        sprite.setY(y);
+        super(textureFileName, x, y, sizeX, sizeY);
         SHRINK_COLLISION_RADIUS_X = sizeX / 8;
         SHRINK_COLLISION_RADIUS_Y = sizeY / 8;
     }
 
-    public void updateImage(String filename) {
-        Texture texture = new Texture(filename);
-        getSprite().setTexture(texture);
-    }
-
-    public float getWidth() {
-        return getSprite().getWidth();
-    }
-
-    public float getHeight() {
-        return getSprite().getHeight();
-    }
-
-    public void setTranslateX(float x) {
-        sprite.translateX(x);
-    }
-
-    public void setTranslateY(float y) {
-        sprite.translateY(y);
-    }
-
-    public float getRotation() {
-        return sprite.getRotation();
-    }
-
-    public float getX() {
-        return sprite.getX();
-    }
-
-    public void setX(float x) {
-        sprite.setX(x);
-    }
-
-    public float getY() {
-        return sprite.getY();
-    }
-
-    public void setY(float y) {
-        sprite.setY(y);
-    }
 
     public float getSpeedX() {
         return speedX;
@@ -84,14 +41,6 @@ public class Figure {
         this.speedY = ySpeed;
     }
 
-    public Sprite getSprite() {
-        return sprite;
-    }
-
-    public void setRotation(float rotation) {
-        sprite.setRotation(rotation);
-    }
-
 
     public void updatePositionFromSpeed() {
         if (getSpeedX() == 0 && getSpeedY() == 0){
@@ -100,36 +49,28 @@ public class Figure {
 
         setX(getX() + getSpeedX());
         setY(getY() + getSpeedY());
+        stopAtEdge();
     }
 
-    public void draw(SpriteBatch batch) {
-        sprite.draw(batch);
-    }
 
     public void stopAtEdge() {
-        if (getX() > Gdx.graphics.getWidth() - sprite.getWidth())
-            setX(Gdx.graphics.getWidth() - sprite.getWidth());
+        if (getX() > Gdx.graphics.getWidth() - getWidth())
+            setX(Gdx.graphics.getWidth() - getWidth());
         if (getX() < 0)
             setX(0);
-        if (getY() > Gdx.graphics.getHeight() - sprite.getHeight())
-            setY(Gdx.graphics.getHeight() - sprite.getHeight());
+        if (getY() > Gdx.graphics.getHeight() - getHeight())
+            setY(Gdx.graphics.getHeight() - getHeight());
         if (getY() < 0)
             setY(0);
     }
 
-    public void bounceAtEdge() {
-        if ((getX() > Gdx.graphics.getWidth() - sprite.getWidth()) || (getX() < 0))
-            setSpeedX(-getSpeedX());
-        if ((getY() > Gdx.graphics.getHeight() - sprite.getHeight()) || (getY() < 0))
-            setSpeedY(-getSpeedY());
-    }
 
     public Rectangle getCollisionRectangle() {
         return new Rectangle(
-                getSprite().getX() + SHRINK_COLLISION_RADIUS_X,
-                getSprite().getY() + SHRINK_COLLISION_RADIUS_Y,
-                getSprite().getWidth() - (2 * SHRINK_COLLISION_RADIUS_X),
-                getSprite().getHeight() - (2 * SHRINK_COLLISION_RADIUS_Y));
+                super.getX() + SHRINK_COLLISION_RADIUS_X,
+                super.getY() + SHRINK_COLLISION_RADIUS_Y,
+                super.getWidth() - (2 * SHRINK_COLLISION_RADIUS_X),
+                super.getHeight() - (2 * SHRINK_COLLISION_RADIUS_Y));
     }
 
     public boolean collidesWith(Rectangle otherRect) {

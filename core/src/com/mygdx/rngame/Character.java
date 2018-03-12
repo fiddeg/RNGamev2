@@ -28,7 +28,7 @@ public class Character extends Figure{
 
     public Character(String textureFileName, float x, float y, int sizeX, int sizeY){
         super(textureFileName, x, y, sizeX, sizeY);
-        getSprite().setOriginCenter();
+        super.setOriginCenter();
 
         //Sätter de olika bilderna för animeringen för idle läget.
         animationIdleFrames = new TextureRegion[4];
@@ -54,10 +54,8 @@ public class Character extends Figure{
         stateTime = 0;
     }
 
-    public void updatePositionFromSpeed(float delta){
-        super.updatePositionFromSpeed();
-        stopAtEdge();
-    }
+
+
 
     //Metod för att hämta nuvarande frame i animationen beroende på i vilken rörelse figuren är i.
     private TextureRegion getImage(){
