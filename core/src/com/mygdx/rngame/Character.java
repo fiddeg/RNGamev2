@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 
 public class Character extends Figure{
+
     private static final int FRAME_COLS = 6;
     private static final int FRAME_ROWS = 2;
 
@@ -25,6 +26,22 @@ public class Character extends Figure{
     private Animation animationRunningLeft;
     private Texture animationRunImg;
     float stateTime;
+
+
+    private enum JumpState  {
+        ASCENDING, DESCENDING, STATIONARY
+    }
+
+    private JumpState currentState;
+    private boolean isJumping;
+
+    //
+    private float gravity = 0.5f;
+    //pretty much speedY, used for Y-distance when jumping with gravity
+    private float yVelocity = 20;
+
+
+
 
     public Character(String textureFileName, float x, float y, int sizeX, int sizeY){
         super(textureFileName, x, y, sizeX, sizeY);
@@ -52,8 +69,44 @@ public class Character extends Figure{
 
         //counts to keep track of key frames of the animation
         stateTime = 0;
+        currentState = JumpState.STATIONARY;
+        isJumping = false;
     }
 
+
+    public JumpState getCurrentState(){
+        return currentState;
+    }
+    public void jump(){
+
+        if (currentState == JumpState.STATIONARY){
+            currentState = JumpState.ASCENDING;
+            setSpeedY(yVelocity);
+        }
+    }
+
+    public void updatePositionFromSpeed() {
+        // update X position according to speed
+        setX(getX() + getSpeedX());
+
+
+        if (currentState == JumpState.ASCENDING){
+            setY(getY() + getSpeedY());
+            setSpeedY(getSpeedY()-gravity);
+            if (getSpeedY() < 0){
+                currentState = JumpState.DESCENDING;
+            }
+        }
+        if (currentState == JumpState.DESCENDING){
+            setY(getY() +getSpeedY());
+            setSpeedY(getSpeedY()-gravity);
+            if (getY() <= 1){
+                currentState=JumpState.STATIONARY;
+                setSpeedY(0);
+            }
+        }
+        stopAtEdge();
+    }
 
 
 

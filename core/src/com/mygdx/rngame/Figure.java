@@ -13,15 +13,14 @@ import com.badlogic.gdx.math.Rectangle;
 public class Figure extends GameObject{
     private float speedX = 0;
     private float speedY = 0;
-    private Sprite sprite;
     private final int SHRINK_COLLISION_RADIUS_X;
     private final int SHRINK_COLLISION_RADIUS_Y;
-
 
     public Figure(String textureFileName, float x, float y, int sizeX, int sizeY) {
         super(textureFileName, x, y, sizeX, sizeY);
         SHRINK_COLLISION_RADIUS_X = sizeX / 8;
         SHRINK_COLLISION_RADIUS_Y = sizeY / 8;
+
     }
 
 
@@ -42,15 +41,7 @@ public class Figure extends GameObject{
     }
 
 
-    public void updatePositionFromSpeed() {
-        if (getSpeedX() == 0 && getSpeedY() == 0){
-            return;
-        }
 
-        setX(getX() + getSpeedX());
-        setY(getY() + getSpeedY());
-        stopAtEdge();
-    }
 
 
     public void stopAtEdge() {

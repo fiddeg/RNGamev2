@@ -58,9 +58,9 @@ public class RNGame extends ApplicationAdapter {
 
 	private void checkInput(){
 
+		//highScore=String.valueOf(character.getCurrentState());
 		if (Gdx.input.justTouched()){
-			//magic happens?
-
+			character.jump();
 		}
 
 		//Kollar sensorn och avgör hastigheten i X-led därefter. tiltTrigger används som gränsvärde för att kunna stå stilla.
@@ -76,6 +76,7 @@ public class RNGame extends ApplicationAdapter {
 
 	@Override
 	public void dispose () {
+		font.dispose();
 		batch.dispose();
 		backImg.dispose();
 	}
