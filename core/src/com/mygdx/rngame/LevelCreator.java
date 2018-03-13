@@ -40,7 +40,7 @@ public class LevelCreator {
     }
 
     private void generatePlayer(){
-        character = new Character("character_idle_0.png", 0,150, 100,100);
+        character = new Character("character_idle_0.png", 0,128, 100,100);
 
     }
 
