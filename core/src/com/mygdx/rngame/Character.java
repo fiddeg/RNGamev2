@@ -6,6 +6,12 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 
 /**
  * Created by Fidde on 2018-02-17.
@@ -39,8 +45,6 @@ public class Character extends Figure{
     private float gravity = 0.5f;
     //pretty much speedY, used for Y-distance when jumping with gravity
     private float yVelocity = 20;
-
-
 
 
     public Character(String textureFileName, float x, float y, int sizeX, int sizeY){

@@ -7,6 +7,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
+
 /**
  * Created by Fidde on 2018-03-13.
  */
@@ -27,7 +28,11 @@ public class Level1Map {
         renderer = new OrthogonalTiledMapRenderer(map);
     }
 
-    public void render(){
+    public TiledMap getMap() {
+        return map;
+    }
+
+    public void render(float delta){
         camera.update();
         renderer.setView(camera);
         renderer.render();

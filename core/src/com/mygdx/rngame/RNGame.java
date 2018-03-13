@@ -10,17 +10,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
@@ -36,6 +28,7 @@ public class RNGame extends ApplicationAdapter {
 	private Music backMusic;
 	private GameState gameState = GameState.TITLE_SCREEN;
 	private Level1Map level1;
+	private TiledMap map;
 
 	//Använde dessa till testing, händigare än logcat IMHO.
 	private BitmapFont font;
@@ -57,6 +50,7 @@ public class RNGame extends ApplicationAdapter {
 		character = levelCreator.getCharacter();
 		titleScreen = new Texture("title screen.png");
 		backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
+
 
 		font = new BitmapFont();
 		font.setColor(Color.FIREBRICK);
@@ -89,11 +83,26 @@ public class RNGame extends ApplicationAdapter {
 				}
 			}
 		}*/
+		for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)){
+			Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+			if (character.collidesWith(rectangle)){
+				//Kollar från vilket håll karaktären kolliderar med ett block.
+				if (character.getY() >= ((rectangle.getY()+rectangle.getHeight())-30)){ //Uppifrån
+					character.setY(rectangle.getY()+rectangle.getHeight());
+					character.setCurrentState(Character.JumpState.STATIONARY);
+				} else if (((character.getX()+character.getWidth()+10) >= rectangle.getX())
+						&& (character.getX()+character.getWidth()-20) < (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från höger
+					character.setX(rectangle.getX()-(character.getWidth()-10));
+				} else if ((character.getX()+30) >= (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från vänster.
+					character.setX((rectangle.getX()+rectangle.getWidth())-10);
+				}
+			}
+		}
 		character.updatePositionFromSpeed();
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		level1.render();
+		level1.render(Gdx.graphics.getDeltaTime());
 		batch.begin();
 		character.draw(batch);
 		font.draw(batch, highScore, 0, Gdx.graphics.getHeight());
@@ -128,9 +137,6 @@ public class RNGame extends ApplicationAdapter {
 		} else {
 			character.setSpeedX(0);
 		}
-
-
-
 	}
 
 	@Override

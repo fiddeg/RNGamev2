@@ -23,6 +23,5 @@
   <object id="7" type="ground" x="640" y="768" width="125.333" height="126.667"/>
   <object id="8" type="ground" x="1152" y="1024" width="638.667" height="125.333"/>
   <object id="9" type="ground" x="1281.33" y="896" width="126.667" height="126.667"/>
-  <object id="10" type="Lava" x="768" y="1069.33" width="384" height="80"/>
  </objectgroup>
 </map>
