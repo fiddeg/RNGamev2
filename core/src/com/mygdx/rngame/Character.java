@@ -28,7 +28,7 @@ public class Character extends Figure{
     float stateTime;
 
 
-    private enum JumpState  {
+    public enum JumpState  {
         ASCENDING, DESCENDING, STATIONARY
     }
 
@@ -73,12 +73,15 @@ public class Character extends Figure{
         isJumping = false;
     }
 
-
     public JumpState getCurrentState(){
         return currentState;
     }
-    public void jump(){
 
+    public void setCurrentState(JumpState currentState) {
+        this.currentState = currentState;
+    }
+
+    public void jump(){
         if (currentState == JumpState.STATIONARY){
             currentState = JumpState.ASCENDING;
             setSpeedY(yVelocity);
@@ -88,8 +91,6 @@ public class Character extends Figure{
     public void updatePositionFromSpeed() {
         // update X position according to speed
         setX(getX() + getSpeedX());
-
-
         if (currentState == JumpState.ASCENDING){
             setY(getY() + getSpeedY());
             setSpeedY(getSpeedY()-gravity);
@@ -102,7 +103,6 @@ public class Character extends Figure{
             setSpeedY(getSpeedY()-gravity);
             if (getY() <= 1){
                 currentState=JumpState.STATIONARY;
-                setSpeedY(0);
             }
         }
         stopAtEdge();

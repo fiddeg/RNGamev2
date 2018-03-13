@@ -14,10 +14,10 @@ import java.util.ArrayList;
 public class RNGame extends ApplicationAdapter {
 	private double tiltTrigger = 0.65;
 	private Character character;
-	SpriteBatch batch;
-	Texture backImg;
-	LevelCreator levelCreator;
-	ArrayList<GameObject> gameObjects;
+	private SpriteBatch batch;
+	private Texture backImg;
+	private LevelCreator levelCreator;
+	private ArrayList<GameObject> gameObjects;
 
 	//Använde dessa till testing, händigare än logcat IMHO.
 	private BitmapFont font;
@@ -31,6 +31,7 @@ public class RNGame extends ApplicationAdapter {
 		levelCreator= new LevelCreator();
 		levelCreator.generateObjects();
 		character = levelCreator.getCharacter();
+		gameObjects = levelCreator.generateObstacles(1);
 
 		font = new BitmapFont();
 		font.setColor(Color.FIREBRICK);
@@ -41,14 +42,32 @@ public class RNGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		checkInput();
-
+		for (GameObject object : gameObjects){
+			if (object instanceof Obstacle){
+				if (character.collidesWith(object.getBoundingRectangle()) && !((Obstacle) object).isEvil()){
+					//Kollar från vilket håll karaktären kolliderar med ett block.
+					if (character.getY() >= ((object.getY()+object.getHeight())-30)){ //Uppifrån
+						character.setY(object.getY()+object.getHeight());
+						character.setCurrentState(Character.JumpState.STATIONARY);
+					} else if (((character.getX()+character.getWidth()+10) >= object.getX())
+							&& (character.getX()+character.getWidth()-20) < (object.getX()+object.getWidth())){ //Karaktären kommer från höger
+						character.setX(object.getX()-(character.getWidth()-10));
+					} else if ((character.getX()+30) >= (object.getX()+object.getWidth())){ //Karaktären kommer från vänster.
+						character.setX((object.getX()+object.getWidth())-10);
+					}
+				}
+			}
+		}
 		character.updatePositionFromSpeed();
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 		batch.draw(backImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
 		character.draw(batch);
+
+		for (GameObject object : gameObjects){
+			object.draw(batch);
+		}
 		font.draw(batch, highScore, 0, Gdx.graphics.getHeight());
 
 		batch.end();
