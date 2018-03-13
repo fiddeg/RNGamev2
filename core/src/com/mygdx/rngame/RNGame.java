@@ -2,6 +2,7 @@ package com.mygdx.rngame;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,10 +19,19 @@ public class RNGame extends ApplicationAdapter {
 	private Texture backImg;
 	private LevelCreator levelCreator;
 	private ArrayList<GameObject> gameObjects;
+	private Texture titleScreen;
+	private Music backMusic;
+	private GameState gameState = GameState.TITLE_SCREEN;
 
 	//Använde dessa till testing, händigare än logcat IMHO.
 	private BitmapFont font;
 	String highScore = "Highscore is: "+"9001";
+
+
+	//Meny-test
+	private enum GameState{
+		TITLE_SCREEN
+	}
 
 
 	@Override
@@ -32,6 +42,8 @@ public class RNGame extends ApplicationAdapter {
 		levelCreator.generateObjects();
 		character = levelCreator.getCharacter();
 		gameObjects = levelCreator.generateObstacles(1);
+		titleScreen = new Texture("title screen.png");
+		backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
 
 		font = new BitmapFont();
 		font.setColor(Color.FIREBRICK);
@@ -41,6 +53,11 @@ public class RNGame extends ApplicationAdapter {
 
 	@Override
 	public void render () {
+		/*if (gameState == GameState.TITLE_SCREEN) {
+			setTitleScreen();
+		}
+		Testkod ovanför för att få något meny-aktigt */
+
 		checkInput();
 		for (GameObject object : gameObjects){
 			if (object instanceof Obstacle){
@@ -73,6 +90,18 @@ public class RNGame extends ApplicationAdapter {
 		batch.end();
 	}
 
+	//titlescreen ska leda till själva spelet, tom tills vi har level att lägga in.
+	public void setTitleScreen() {
+		backMusic.play();
+		batch.begin();
+		batch.draw(titleScreen,0,0);
+
+		if (Gdx.input.isTouched()) {
+
+		}
+
+		batch.end();
+	}
 
 
 	private void checkInput(){
@@ -98,5 +127,6 @@ public class RNGame extends ApplicationAdapter {
 		font.dispose();
 		batch.dispose();
 		backImg.dispose();
+		titleScreen.dispose();
 	}
 }
