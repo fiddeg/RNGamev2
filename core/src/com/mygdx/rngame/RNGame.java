@@ -93,7 +93,7 @@ public class RNGame extends ApplicationAdapter {
                 if (character.collidesWith(rectangle)) {
                     //Kollar från vilket håll karaktären kolliderar med ett block.
                     if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
-                        if (!Gdx.input.isTouched()) {
+                        if (!Gdx.input.justTouched()) {
                             character.setY(rectangle.getY() + rectangle.getHeight() - 15);
                             isOnGround = true;
                         }
