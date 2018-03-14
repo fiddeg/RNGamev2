@@ -23,6 +23,8 @@ public class RNGame extends ApplicationAdapter {
     private Character character;
     private SpriteBatch batch;
     private Texture backImg;
+    private Texture gameOverImg;
+    private Texture winImg;
     private LevelCreator levelCreator;
     private ArrayList<GameObject> gameObjects;
     private Texture titleScreen;
@@ -45,7 +47,8 @@ public class RNGame extends ApplicationAdapter {
         LEVEL1_SCREEN,
         LEVEL2_SCREEN,
         LEVEL3_SCREEN,
-        GAMEOVER_SCREEN
+        GAMEOVER_SCREEN,
+        COMPLETED_GAME_SCREEN
     }
 
 
@@ -57,6 +60,8 @@ public class RNGame extends ApplicationAdapter {
         character = levelCreator.getCharacter();
         gameObjects = levelCreator.generateObstacles(1);
         titleScreen = new Texture("title screen.png");
+        gameOverImg = new Texture("gameover.png");
+        winImg = new Texture("winscreen.png");
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
 
         //Generator för att läsa in en font till bitmapFont
@@ -71,6 +76,8 @@ public class RNGame extends ApplicationAdapter {
         timeLeftFont.setColor(Color.FIREBRICK);
 
         level1 = new Level1Map();
+
+
     }
 
     @Override
@@ -78,63 +85,139 @@ public class RNGame extends ApplicationAdapter {
         if (gameState == GameState.TITLE_SCREEN) {
             setTitleScreen();
         } else if (gameState == GameState.LEVEL1_SCREEN) {
+            renderLevel();
 
-		/*
-        Testkod ovanför för att få något meny-aktigt */
+        } else if (gameState == GameState.LEVEL2_SCREEN) {
+            renderLevel();
 
-            if (time > 0) {
-                time -= Gdx.graphics.getDeltaTime();
+        } else if (gameState == GameState.LEVEL3_SCREEN) {
+            renderLevel();
+
+        } else if (gameState == GameState.GAMEOVER_SCREEN) {
+            renderGameOver();
+        } else if (gameState == GameState.COMPLETED_GAME_SCREEN){
+            renderWinningScreen();
+        }
+
+    }
+
+
+
+
+    public void renderLevel(){
+        if (time > 0) {
+            time -= Gdx.graphics.getDeltaTime();
+        }
+        checkInput();
+
+        isOnGround = false;
+        for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
+            Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+            if (character.collidesWith(rectangle)) {
+                //Kollar från vilket håll karaktären kolliderar med ett block.
+                if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
+                    if (!Gdx.input.justTouched()) {
+                        character.setY(rectangle.getY() + rectangle.getHeight() - 15);
+                        isOnGround = true;
+                    }
+                } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
+                        && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
+                    character.setX(rectangle.getX() - (character.getWidth() - 20));
+                } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
+                    character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
+                }
             }
-            checkInput();
+        }
+        if (isOnGround) {
+            character.setCurrentState(Character.JumpState.STATIONARY);
+            character.setSpeedY(0);
+        } else {
+            character.setCurrentState(Character.JumpState.DESCENDING);
+        }
 
-            isOnGround = false;
-            for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
-                Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-                if (character.collidesWith(rectangle)) {
-                    //Kollar från vilket håll karaktären kolliderar med ett block.
-                    if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
-                        if (!Gdx.input.justTouched()) {
-                            character.setY(rectangle.getY() + rectangle.getHeight() - 15);
-                            isOnGround = true;
-                        }
-                    } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
-                            && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
-                        character.setX(rectangle.getX() - (character.getWidth() - 20));
-                    } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
-                        character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
+        for (GameObject gameObject: gameObjects){
+            if (character.collidesWith(gameObject.getBoundingRectangle())){
+                if (((Obstacle) gameObject).isEvil()){
+                    gameState=GameState.GAMEOVER_SCREEN;
+                    resetCharacter(); //resets position of character
+                    gameObjects = levelCreator.generateObstacles(1);
+
+
+                } else {
+                    if (gameState == GameState.LEVEL1_SCREEN){
+                        //score = timeleft * 10?
+                        resetCharacter();
+                        gameState = GameState.LEVEL2_SCREEN;
+                        gameObjects = levelCreator.generateObstacles(2);
+
+                    } else if (gameState == GameState.LEVEL2_SCREEN){
+                        //score += timeleft * 10?
+                        resetCharacter();
+                        gameState = GameState.LEVEL3_SCREEN;
+                        gameObjects = levelCreator.generateObstacles(3);
+
+                    } else if (gameState == GameState.LEVEL3_SCREEN){
+                        //score += timeleft * 10?
+                        resetCharacter();
+                        gameState = GameState.COMPLETED_GAME_SCREEN;
+                        gameObjects = levelCreator.generateObstacles(1);
+
                     }
                 }
             }
-            if (isOnGround) {
-                character.setCurrentState(Character.JumpState.STATIONARY);
-                character.setSpeedY(0);
-            } else {
-                character.setCurrentState(Character.JumpState.DESCENDING);
-            }
-
-            character.updatePositionFromSpeed();
-            Gdx.gl.glClearColor(1, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-            level1.render(Gdx.graphics.getDeltaTime());
-            batch.begin();
-
-            character.draw(batch);
-            for (GameObject object : gameObjects) {
-                object.draw(batch);
-            }
-		highScoreFont.draw(batch, highScore + score, 5, Gdx.graphics.getHeight()-5);
-		timeLeftFont.draw(batch, timeLeft + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
-
-            batch.end();
-
-        } else if (gameState == GameState.LEVEL2_SCREEN) {
-
-        } else if (gameState == GameState.LEVEL3_SCREEN) {
-
-        } else if (gameState == GameState.GAMEOVER_SCREEN) {
-
         }
+
+
+        character.updatePositionFromSpeed();
+        Gdx.gl.glClearColor(1, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+
+        level1.render(Gdx.graphics.getDeltaTime());
+        batch.begin();
+        character.draw(batch);
+        for (GameObject object : gameObjects) {
+            object.draw(batch);
+        }
+        highScoreFont.draw(batch, highScore + score, 5, Gdx.graphics.getHeight()-5);
+        timeLeftFont.draw(batch, timeLeft + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
+
+        batch.end();
+
+
+
+    }
+
+    public void resetCharacter(){
+        character.setX(0);
+        character.setY(140);
+        character.setSpeedY(0);
+        character.setSpeedX(0);
+
+    }
+
+    private void renderWinningScreen() {
+
+        batch.begin();
+        batch.draw(winImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (Gdx.input.isTouched()) {
+            gameState = GameState.TITLE_SCREEN; //fulfix, behöver någon delay eller ngt
+        }
+
+        batch.end();
+    }
+
+    public void renderGameOver(){
+
+        batch.begin();
+        batch.draw(gameOverImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (Gdx.input.isTouched()) {
+            gameState = GameState.TITLE_SCREEN; //fulfix, behöver någon delay eller ngt
+        }
+
+        batch.end();
 
     }
 

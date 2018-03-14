@@ -21,7 +21,26 @@ public class LevelCreator {
             obstacles.add(new Obstacle("lava_1.png",768,0,128,128,true));
             obstacles.add(new Obstacle("lava_1.png",896,0,128,128,true));
             obstacles.add(new Obstacle("lava_1.png",1024,0,128,128,true));
+            obstacles.add(new Obstacle("flag1.png",Gdx.graphics.getWidth()-50, 80, 50, Gdx.graphics.getHeight()/2, false));
+
         }
+        if (level == 2){
+            obstacles.add(new Obstacle("water1.png",768,0,128,128,false));
+            obstacles.add(new Obstacle("water1.png",896,0,128,128,false));
+            obstacles.add(new Obstacle("water1.png",1024,0,128,128,false));
+            obstacles.add(new Obstacle("flag2.png",Gdx.graphics.getWidth()-50, 80, 50, Gdx.graphics.getHeight()/2, true));
+
+        }
+        if (level == 3){
+            obstacles.add(new Obstacle("steam.png",768,0,128,128,true));
+            obstacles.add(new Obstacle("steam.png",896,0,128,128,true));
+            obstacles.add(new Obstacle("steam.png",1024,0,128,128,true));
+            obstacles.add(new Obstacle("flag1.png",Gdx.graphics.getWidth()-50, 80, 50, Gdx.graphics.getHeight()/2, false));
+
+        }
+
+
+
         return obstacles;
 
     }
