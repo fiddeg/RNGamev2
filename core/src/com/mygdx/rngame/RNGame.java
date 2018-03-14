@@ -32,14 +32,16 @@ public class RNGame extends ApplicationAdapter {
     private GameState gameState = GameState.TITLE_SCREEN;
     private Level1Map level1;
     private boolean isOnGround;
+    private DatabaseConnection databaseConnection;
 
     //Använde dessa till testing, händigare än logcat IMHO.
     private BitmapFont highScoreFont;
     private BitmapFont timeLeftFont;
-    String highScore = "Highscore is: ";
-    String timeLeft = "Time left: ";
-    int score = 0;
-    float time = 6;
+    private String highScore = "Highscore is: ";
+    private String timeLeftText = "Time left: ";
+    private int prevHighScore;
+    private int score = 0;
+    private float time = 10;
 
     //Meny-test
     private enum GameState {
@@ -51,6 +53,10 @@ public class RNGame extends ApplicationAdapter {
         COMPLETED_GAME_SCREEN
     }
 
+    //Konstruktor för att kunna länka Databas Connection till AndroidLauncher
+    public RNGame(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
 
     @Override
     public void create() {
@@ -63,6 +69,7 @@ public class RNGame extends ApplicationAdapter {
         gameOverImg = new Texture("gameover.png");
         winImg = new Texture("winscreen.png");
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
+        prevHighScore = Integer.valueOf(databaseConnection.getScore());
 
         //Generator för att läsa in en font till bitmapFont
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Roboto-Regular.ttf"));
@@ -76,8 +83,6 @@ public class RNGame extends ApplicationAdapter {
         timeLeftFont.setColor(Color.FIREBRICK);
 
         level1 = new Level1Map();
-
-
     }
 
     @Override
@@ -101,12 +106,14 @@ public class RNGame extends ApplicationAdapter {
 
     }
 
-
-
-
     public void renderLevel(){
         if (time > 0) {
             time -= Gdx.graphics.getDeltaTime();
+        } else {
+            gameState=GameState.GAMEOVER_SCREEN;
+            resetCharacter(); //resets position of character
+            resetTime();
+            gameObjects = levelCreator.generateObstacles(1);
         }
         checkInput();
 
@@ -140,25 +147,29 @@ public class RNGame extends ApplicationAdapter {
                 if (((Obstacle) gameObject).isEvil()){
                     gameState=GameState.GAMEOVER_SCREEN;
                     resetCharacter(); //resets position of character
+                    resetTime();
                     gameObjects = levelCreator.generateObstacles(1);
 
 
                 } else {
                     if (gameState == GameState.LEVEL1_SCREEN){
-                        //score = timeleft * 10?
+                        score = (int) time * 10;
                         resetCharacter();
+                        resetTime();
                         gameState = GameState.LEVEL2_SCREEN;
                         gameObjects = levelCreator.generateObstacles(2);
 
                     } else if (gameState == GameState.LEVEL2_SCREEN){
-                        //score += timeleft * 10?
+                        score += (int) time * 10;
                         resetCharacter();
+                        resetTime();
                         gameState = GameState.LEVEL3_SCREEN;
                         gameObjects = levelCreator.generateObstacles(3);
 
                     } else if (gameState == GameState.LEVEL3_SCREEN){
-                        //score += timeleft * 10?
+                        score += (int) time * 10;
                         resetCharacter();
+                        resetTime();
                         gameState = GameState.COMPLETED_GAME_SCREEN;
                         gameObjects = levelCreator.generateObstacles(1);
 
@@ -179,8 +190,8 @@ public class RNGame extends ApplicationAdapter {
         for (GameObject object : gameObjects) {
             object.draw(batch);
         }
-        highScoreFont.draw(batch, highScore + score, 5, Gdx.graphics.getHeight()-5);
-        timeLeftFont.draw(batch, timeLeft + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
+        highScoreFont.draw(batch, highScore + prevHighScore, 5, Gdx.graphics.getHeight()-5);
+        timeLeftFont.draw(batch, timeLeftText + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
 
         batch.end();
 
@@ -196,29 +207,41 @@ public class RNGame extends ApplicationAdapter {
 
     }
 
-    private void renderWinningScreen() {
+    public void resetTime(){
+        time = 10;
+    }
 
+    private void renderWinningScreen() {
+        //Kollar om man slagit High Score
+        if (score > prevHighScore){
+            databaseConnection.setScore(String.valueOf(score));
+        }
         batch.begin();
         batch.draw(winImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if (Gdx.input.isTouched()) {
-            gameState = GameState.TITLE_SCREEN; //fulfix, behöver någon delay eller ngt
+        if (Gdx.input.justTouched()) {
+            prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+            gameState = GameState.TITLE_SCREEN;
         }
 
         batch.end();
     }
 
     public void renderGameOver(){
+        //Kollar om man slagit High Score
+        if (score > prevHighScore){
+            databaseConnection.setScore(String.valueOf(score));
+        }
 
         batch.begin();
         batch.draw(gameOverImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if (Gdx.input.isTouched()) {
-            gameState = GameState.TITLE_SCREEN; //fulfix, behöver någon delay eller ngt
+        if (Gdx.input.justTouched()) {
+            prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+            gameState = GameState.TITLE_SCREEN;
         }
 
         batch.end();
-
     }
 
     //titlescreen ska leda till själva spelet, tom tills vi har level att lägga in.
@@ -228,7 +251,7 @@ public class RNGame extends ApplicationAdapter {
         batch.begin();
         batch.draw(titleScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if (Gdx.input.isTouched()) {
+        if (Gdx.input.justTouched()) {
             backMusic.stop();
             backMusic.play();
             gameState = GameState.LEVEL1_SCREEN;
