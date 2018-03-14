@@ -14,14 +14,14 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,1,0,0,0,0,0,0,0,0,
 0,0,0,0,1,1,0,0,0,0,1,0,0,0,
-1,1,1,1,1,1,2,2,2,1,1,1,1,1
+1,1,1,1,1,1,0,0,0,1,1,1,1,1
 </data>
  </layer>
  <objectgroup name="GroundObjects">
-  <object id="5" type="ground" x="0" y="1024" width="766.667" height="125.333"/>
-  <object id="6" type="ground" x="512" y="897.333" width="253.333" height="126.667"/>
-  <object id="7" type="ground" x="640" y="768" width="125.333" height="126.667"/>
+  <object id="5" type="ground" x="0" y="1024" width="640" height="125.333"/>
+  <object id="6" type="ground" x="512" y="897.333" width="189.333" height="176"/>
+  <object id="7" type="ground" x="640" y="768" width="125.333" height="382.667"/>
   <object id="8" type="ground" x="1152" y="1024" width="638.667" height="125.333"/>
-  <object id="9" type="ground" x="1281.33" y="896" width="126.667" height="126.667"/>
+  <object id="9" type="ground" x="1281.33" y="896" width="126.667" height="253.334"/>
  </objectgroup>
 </map>

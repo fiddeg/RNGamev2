@@ -1,9 +1,6 @@
 package com.mygdx.rngame;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -18,7 +15,7 @@ public class Figure extends GameObject{
 
     public Figure(String textureFileName, float x, float y, int sizeX, int sizeY) {
         super(textureFileName, x, y, sizeX, sizeY);
-        SHRINK_COLLISION_RADIUS_X = sizeX / 8;
+        SHRINK_COLLISION_RADIUS_X = sizeX / 4;
         SHRINK_COLLISION_RADIUS_Y = sizeY / 8;
 
     }

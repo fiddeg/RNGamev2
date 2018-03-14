@@ -5,14 +5,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 
@@ -28,12 +29,15 @@ public class RNGame extends ApplicationAdapter {
 	private Music backMusic;
 	private GameState gameState = GameState.TITLE_SCREEN;
 	private Level1Map level1;
-	private TiledMap map;
+	private boolean isOnGround;
 
 	//Använde dessa till testing, händigare än logcat IMHO.
-	private BitmapFont font;
-	String highScore = "Highscore is: "+"9001";
-
+	private BitmapFont highScoreFont;
+	private BitmapFont timeLeftFont;
+	String highScore = "Highscore is: ";
+	String timeLeft = "Time left: ";
+	int score = 0;
+	float time = 6;
 
 	//Meny-test
 	private enum GameState{
@@ -44,16 +48,23 @@ public class RNGame extends ApplicationAdapter {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		backImg = new Texture("parallax background.png");
 		levelCreator= new LevelCreator();
 		levelCreator.generateObjects();
 		character = levelCreator.getCharacter();
+		gameObjects = levelCreator.generateObstacles(1);
 		titleScreen = new Texture("title screen.png");
 		backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
 
+		//Generator för att läsa in en font till bitmapFont
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Roboto-Regular.ttf"));
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 41;
+		highScoreFont = generator.generateFont(parameter);
+		timeLeftFont = generator.generateFont(parameter);
+		generator.dispose();
 
-		font = new BitmapFont();
-		font.setColor(Color.FIREBRICK);
+		highScoreFont.setColor(Color.FIREBRICK);
+		timeLeftFont.setColor(Color.FIREBRICK);
 
 		level1 = new Level1Map();
 	}
@@ -65,47 +76,49 @@ public class RNGame extends ApplicationAdapter {
 		}
 		Testkod ovanför för att få något meny-aktigt */
 
+		if (time > 0){
+			time -= Gdx.graphics.getDeltaTime();
+		}
 		checkInput();
-		/*
-		for (GameObject object : gameObjects){
-			if (object instanceof Obstacle){
-				if (character.collidesWith(object.getBoundingRectangle()) && !((Obstacle) object).isEvil()){
-					//Kollar från vilket håll karaktären kolliderar med ett block.
-					if (character.getY() >= ((object.getY()+object.getHeight())-30)){ //Uppifrån
-						character.setY(object.getY()+object.getHeight());
-						character.setCurrentState(Character.JumpState.STATIONARY);
-					} else if (((character.getX()+character.getWidth()+10) >= object.getX())
-							&& (character.getX()+character.getWidth()-20) < (object.getX()+object.getWidth())){ //Karaktären kommer från höger
-						character.setX(object.getX()-(character.getWidth()-10));
-					} else if ((character.getX()+30) >= (object.getX()+object.getWidth())){ //Karaktären kommer från vänster.
-						character.setX((object.getX()+object.getWidth())-10);
-					}
-				}
-			}
-		}*/
+
+		isOnGround = false;
 		for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)){
 			Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
 			if (character.collidesWith(rectangle)){
 				//Kollar från vilket håll karaktären kolliderar med ett block.
-				if (character.getY() >= ((rectangle.getY()+rectangle.getHeight())-30)){ //Uppifrån
-					character.setY(rectangle.getY()+rectangle.getHeight());
-					character.setCurrentState(Character.JumpState.STATIONARY);
-				} else if (((character.getX()+character.getWidth()+10) >= rectangle.getX())
-						&& (character.getX()+character.getWidth()-20) < (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från höger
-					character.setX(rectangle.getX()-(character.getWidth()-10));
-				} else if ((character.getX()+30) >= (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från vänster.
-					character.setX((rectangle.getX()+rectangle.getWidth())-10);
+				if (character.getY() >= ((rectangle.getY()+rectangle.getHeight())-40)){ //Uppifrån
+					if (!Gdx.input.isTouched()){
+						character.setY(rectangle.getY()+rectangle.getHeight()-15);
+						isOnGround = true;
+					}
+				} else if (((character.getX()+character.getWidth()+20) >= rectangle.getX())
+						&& (character.getX()+character.getWidth()-22) < (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från höger
+					character.setX(rectangle.getX()-(character.getWidth()-20));
+				} else if ((character.getX()+40) >= (rectangle.getX()+rectangle.getWidth())){ //Karaktären kommer från vänster.
+					character.setX((rectangle.getX()+rectangle.getWidth())-22);
 				}
 			}
 		}
+		if (isOnGround){
+			character.setCurrentState(Character.JumpState.STATIONARY);
+			character.setSpeedY(0);
+		} else {
+			character.setCurrentState(Character.JumpState.DESCENDING);
+		}
+
 		character.updatePositionFromSpeed();
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		level1.render(Gdx.graphics.getDeltaTime());
 		batch.begin();
+
 		character.draw(batch);
-		font.draw(batch, highScore, 0, Gdx.graphics.getHeight());
+		for (GameObject object : gameObjects){
+			object.draw(batch);
+		}
+		highScoreFont.draw(batch, highScore + score, 5, Gdx.graphics.getHeight()-5);
+		timeLeftFont.draw(batch, timeLeft + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
 
 		batch.end();
 	}
@@ -141,9 +154,8 @@ public class RNGame extends ApplicationAdapter {
 
 	@Override
 	public void dispose () {
-		font.dispose();
+		highScoreFont.dispose();
 		batch.dispose();
-		backImg.dispose();
 		titleScreen.dispose();
 	}
 }
