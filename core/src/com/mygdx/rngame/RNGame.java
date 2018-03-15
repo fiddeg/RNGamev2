@@ -25,6 +25,8 @@ public class RNGame extends ApplicationAdapter {
     private Texture backImg;
     private Texture gameOverImg;
     private Texture winImg;
+    private Texture loginButtonTexture;
+    private Texture shareButtonTexture;
     private LevelCreator levelCreator;
     private ArrayList<GameObject> gameObjects;
     private Texture titleScreen;
@@ -53,6 +55,14 @@ public class RNGame extends ApplicationAdapter {
         COMPLETED_GAME_SCREEN
     }
 
+    //Connectar till appens ID och api
+    private static final String API_APP_ID = "405872543173805";
+    private FacebookApi facebookApi;
+
+    private void setupFbApiInst() {
+        facebookApi = new FacebookApi(API_APP_ID);
+    }
+
     //Konstruktor för att kunna länka Databas Connection till AndroidLauncher
     public RNGame(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
@@ -68,6 +78,8 @@ public class RNGame extends ApplicationAdapter {
         titleScreen = new Texture("title screen.png");
         gameOverImg = new Texture("gameover.png");
         winImg = new Texture("winscreen.png");
+        loginButtonTexture = new Texture("login_button.png");
+        shareButtonTexture = new Texture("button_post_enabled.png");
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
         prevHighScore = Integer.valueOf(databaseConnection.getScore());
 
@@ -78,6 +90,8 @@ public class RNGame extends ApplicationAdapter {
         highScoreFont = generator.generateFont(parameter);
         timeLeftFont = generator.generateFont(parameter);
         generator.dispose();
+
+        setupFbApiInst();
 
         highScoreFont.setColor(Color.FIREBRICK);
         timeLeftFont.setColor(Color.FIREBRICK);
@@ -215,6 +229,11 @@ public class RNGame extends ApplicationAdapter {
         //Kollar om man slagit High Score
         if (score > prevHighScore){
             databaseConnection.setScore(String.valueOf(score));
+            batch.begin();
+            batch.draw(shareButtonTexture,500,500);
+            if (Gdx.input.justTouched()) {
+                fbShare();
+            }
         }
         batch.begin();
         batch.draw(winImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -231,6 +250,11 @@ public class RNGame extends ApplicationAdapter {
         //Kollar om man slagit High Score
         if (score > prevHighScore){
             databaseConnection.setScore(String.valueOf(score));
+            batch.begin();
+            batch.draw(shareButtonTexture,500,500);
+            if (Gdx.input.justTouched()) {
+                fbShare();
+            }
         }
 
         batch.begin();
@@ -250,14 +274,26 @@ public class RNGame extends ApplicationAdapter {
         //backMusic.setLooping(true);
         batch.begin();
         batch.draw(titleScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(loginButtonTexture,50,50);
 
         if (Gdx.input.justTouched()) {
+            fbLogin();
+
             backMusic.stop();
             backMusic.play();
             gameState = GameState.LEVEL1_SCREEN;
         }
 
         batch.end();
+    }
+
+    //Adderar en sanslöst basic login
+    public void fbLogin() {
+        facebookApi.signIn();
+    }
+
+    public void fbShare() {
+        facebookApi.sharePost();
     }
 
 
