@@ -22,10 +22,8 @@ public class RNGame extends ApplicationAdapter {
     private double tiltTrigger = 0.65;
     private Character character;
     private SpriteBatch batch;
-    private Texture backImg;
     private Texture gameOverImg;
     private Texture winImg;
-    private Texture loginButtonTexture;
     private Texture shareButtonTexture;
     private LevelCreator levelCreator;
     private ArrayList<GameObject> gameObjects;
@@ -76,9 +74,8 @@ public class RNGame extends ApplicationAdapter {
         character = levelCreator.getCharacter();
         gameObjects = levelCreator.generateObstacles(1);
         titleScreen = new Texture("title screen.png");
-        gameOverImg = new Texture("gameover.png");
-        winImg = new Texture("winscreen.png");
-        loginButtonTexture = new Texture("login_button.png");
+        gameOverImg = new Texture("gameover_screen.png");
+        winImg = new Texture("winner_screen.png");
         shareButtonTexture = new Texture("button_post_enabled.png");
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
         prevHighScore = Integer.valueOf(databaseConnection.getScore());
@@ -232,7 +229,7 @@ public class RNGame extends ApplicationAdapter {
             batch.begin();
             batch.draw(shareButtonTexture,500,500);
             if (Gdx.input.justTouched()) {
-                fbShare();
+                facebookApi.sharePost();
             }
         }
         batch.begin();
@@ -253,7 +250,7 @@ public class RNGame extends ApplicationAdapter {
             batch.begin();
             batch.draw(shareButtonTexture,500,500);
             if (Gdx.input.justTouched()) {
-                fbShare();
+                facebookApi.sharePost();
             }
         }
 
@@ -274,11 +271,8 @@ public class RNGame extends ApplicationAdapter {
         //backMusic.setLooping(true);
         batch.begin();
         batch.draw(titleScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(loginButtonTexture,50,50);
 
         if (Gdx.input.justTouched()) {
-            fbLogin();
-
             backMusic.stop();
             backMusic.play();
             gameState = GameState.LEVEL1_SCREEN;
@@ -287,14 +281,6 @@ public class RNGame extends ApplicationAdapter {
         batch.end();
     }
 
-    //Adderar en sanslöst basic login
-    public void fbLogin() {
-        facebookApi.signIn();
-    }
-
-    public void fbShare() {
-        facebookApi.sharePost();
-    }
 
 
     private void checkInput() {
