@@ -9,12 +9,23 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.ArrayList;
 
@@ -44,6 +55,7 @@ public class RNGame extends ApplicationAdapter {
     private int prevHighScore;
     private int score = 0;
     private float time = 10;
+    private boolean newHighScore;
 
     //Meny-test
     private enum GameState {
@@ -82,6 +94,7 @@ public class RNGame extends ApplicationAdapter {
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
         deathMusic = Gdx.audio.newSound(Gdx.files.internal("deathsplat2.mp3"));
         prevHighScore = Integer.valueOf(databaseConnection.getScore());
+        newHighScore = false;
 
         //Generator för att läsa in en font till bitmapFont
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Roboto-Regular.ttf"));
@@ -211,9 +224,6 @@ public class RNGame extends ApplicationAdapter {
         timeLeftFont.draw(batch, timeLeftText + String.format(java.util.Locale.US,"%.1f",time), Gdx.graphics.getWidth()-250, Gdx.graphics.getHeight()-5);
 
         batch.end();
-
-
-
     }
 
     public void resetCharacter(){
@@ -232,18 +242,28 @@ public class RNGame extends ApplicationAdapter {
         //Kollar om man slagit High Score
         if (score > prevHighScore){
             databaseConnection.setScore(String.valueOf(score));
-            batch.begin();
-            batch.draw(shareButtonTexture,500,500);
-            if (Gdx.input.justTouched()) {
-                facebookApi.sharePost();
-            }
+            newHighScore = true;
         }
+
         batch.begin();
         batch.draw(winImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        if (newHighScore){
+            batch.draw(shareButtonTexture,Gdx.graphics.getWidth()/2-253,200, 253*2,40*2);
+        }
 
         if (Gdx.input.justTouched()) {
-            prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
-            gameState = GameState.TITLE_SCREEN;
+            if (newHighScore){
+                if((Gdx.input.getX() >= (Gdx.graphics.getWidth()/2)-253 && Gdx.input.getX() <= (Gdx.graphics.getWidth()/2)+253) && (Gdx.input.getY() <= Gdx.graphics.getHeight()-200 && Gdx.input.getY() >= Gdx.graphics.getHeight()-240)){
+                    facebookApi.sharePost();
+                } else {
+                    prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+                    gameState = GameState.TITLE_SCREEN;
+                }
+                newHighScore = false;
+            } else {
+                prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+                gameState = GameState.TITLE_SCREEN;
+            }
         }
 
         batch.end();
@@ -253,19 +273,27 @@ public class RNGame extends ApplicationAdapter {
         //Kollar om man slagit High Score
         if (score > prevHighScore){
             databaseConnection.setScore(String.valueOf(score));
-            batch.begin();
-            batch.draw(shareButtonTexture,500,500);
-            if (Gdx.input.justTouched()) {
-                facebookApi.sharePost();
-            }
+            newHighScore = true;
         }
 
         batch.begin();
         batch.draw(gameOverImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+        if (newHighScore){
+            batch.draw(shareButtonTexture,Gdx.graphics.getWidth()/2-253,200, 253*2,40*2);
+        }
         if (Gdx.input.justTouched()) {
-            prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
-            gameState = GameState.TITLE_SCREEN;
+            if (newHighScore){
+                if((Gdx.input.getX() >= (Gdx.graphics.getWidth()/2)-253 && Gdx.input.getX() <= (Gdx.graphics.getWidth()/2)+253) && (Gdx.input.getY() <= Gdx.graphics.getHeight()-200 && Gdx.input.getY() >= Gdx.graphics.getHeight()-240)){
+                    facebookApi.sharePost();
+                } else {
+                    prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+                    gameState = GameState.TITLE_SCREEN;
+                }
+                newHighScore = false;
+            } else {
+                prevHighScore = Integer.valueOf(databaseConnection.getScore()); //Hämtar high score på nytt.
+                gameState = GameState.TITLE_SCREEN;
+            }
         }
 
         batch.end();
