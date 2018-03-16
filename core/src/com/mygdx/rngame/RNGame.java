@@ -310,5 +310,6 @@ public class RNGame extends ApplicationAdapter {
         batch.dispose();
         titleScreen.dispose();
         backMusic.dispose();
+        deathMusic.dispose();
     }
 }
