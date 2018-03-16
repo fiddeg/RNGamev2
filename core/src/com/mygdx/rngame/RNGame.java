@@ -9,23 +9,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.util.ArrayList;
 
@@ -43,7 +30,9 @@ public class RNGame extends ApplicationAdapter {
     private Music backMusic;
     private Sound deathMusic;
     private GameState gameState = GameState.TITLE_SCREEN;
-    private Level1Map level1;
+    private LevelMap level1;
+    private LevelMap level2;
+    private LevelMap level3;
     private boolean isOnGround;
     private DatabaseConnection databaseConnection;
 
@@ -109,7 +98,9 @@ public class RNGame extends ApplicationAdapter {
         highScoreFont.setColor(Color.FIREBRICK);
         timeLeftFont.setColor(Color.FIREBRICK);
 
-        level1 = new Level1Map();
+        level1 = new LevelMap(1);
+        level2 = new LevelMap(2);
+        level3 = new LevelMap(3);
     }
 
     @Override
@@ -145,29 +136,12 @@ public class RNGame extends ApplicationAdapter {
         }
         checkInput();
 
-        isOnGround = false;
-        for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
-            Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-            if (character.collidesWith(rectangle)) {
-                //Kollar från vilket håll karaktären kolliderar med ett block.
-                if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
-                    if (!Gdx.input.justTouched()) {
-                        character.setY(rectangle.getY() + rectangle.getHeight() - 15);
-                        isOnGround = true;
-                    }
-                } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
-                        && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
-                    character.setX(rectangle.getX() - (character.getWidth() - 20));
-                } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
-                    character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
-                }
-            }
-        }
-        if (isOnGround) {
-            character.setCurrentState(Character.JumpState.STATIONARY);
-            character.setSpeedY(0);
-        } else {
-            character.setCurrentState(Character.JumpState.DESCENDING);
+        if (gameState == GameState.LEVEL1_SCREEN){
+            platformDetection(1);
+        } else if (gameState == GameState.LEVEL2_SCREEN){
+            platformDetection(2);
+        } else if (gameState == GameState.LEVEL3_SCREEN){
+            platformDetection(3);
         }
 
         for (GameObject gameObject: gameObjects){
@@ -213,8 +187,13 @@ public class RNGame extends ApplicationAdapter {
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
-        level1.render(Gdx.graphics.getDeltaTime());
+        if (gameState == GameState.LEVEL1_SCREEN){
+            level1.render(Gdx.graphics.getDeltaTime());
+        } else if (gameState == GameState.LEVEL2_SCREEN){
+            level2.render(Gdx.graphics.getDeltaTime());
+        } else if (gameState == GameState.LEVEL3_SCREEN){
+            level3.render(Gdx.graphics.getDeltaTime());
+        }
         batch.begin();
         character.draw(batch);
         for (GameObject object : gameObjects) {
@@ -330,6 +309,83 @@ public class RNGame extends ApplicationAdapter {
             character.setSpeedX((float) ((Gdx.input.getAccelerometerY()) * 2.5));
         } else {
             character.setSpeedX(0);
+        }
+    }
+
+    private void platformDetection(int level){
+        isOnGround = false;
+        if (level == 1){
+            for (MapObject object : level1.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
+                Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+                if (character.collidesWith(rectangle)) {
+                    //Kollar från vilket håll karaktären kolliderar med ett block.
+                    if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
+                        if (!Gdx.input.justTouched()) {
+                            character.setY(rectangle.getY() + rectangle.getHeight() - 15);
+                            isOnGround = true;
+                        }
+                    } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
+                            && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
+                        character.setX(rectangle.getX() - (character.getWidth() - 20));
+                    } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
+                        character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
+                    }
+                }
+            }
+            if (isOnGround) {
+                character.setCurrentState(Character.JumpState.STATIONARY);
+                character.setSpeedY(0);
+            } else {
+                character.setCurrentState(Character.JumpState.DESCENDING);
+            }
+        } else if (level == 2){
+            for (MapObject object : level2.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
+                Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+                if (character.collidesWith(rectangle)) {
+                    //Kollar från vilket håll karaktären kolliderar med ett block.
+                    if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
+                        if (!Gdx.input.justTouched()) {
+                            character.setY(rectangle.getY() + rectangle.getHeight() - 15);
+                            isOnGround = true;
+                        }
+                    } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
+                            && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
+                        character.setX(rectangle.getX() - (character.getWidth() - 20));
+                    } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
+                        character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
+                    }
+                }
+            }
+            if (isOnGround) {
+                character.setCurrentState(Character.JumpState.STATIONARY);
+                character.setSpeedY(0);
+            } else {
+                character.setCurrentState(Character.JumpState.DESCENDING);
+            }
+        } else if (level == 3){
+            for (MapObject object : level3.getMap().getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
+                Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+                if (character.collidesWith(rectangle)) {
+                    //Kollar från vilket håll karaktären kolliderar med ett block.
+                    if (character.getY() >= ((rectangle.getY() + rectangle.getHeight()) - 40)) { //Uppifrån
+                        if (!Gdx.input.justTouched()) {
+                            character.setY(rectangle.getY() + rectangle.getHeight() - 15);
+                            isOnGround = true;
+                        }
+                    } else if (((character.getX() + character.getWidth() + 20) >= rectangle.getX())
+                            && (character.getX() + character.getWidth() - 22) < (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från höger
+                        character.setX(rectangle.getX() - (character.getWidth() - 20));
+                    } else if ((character.getX() + 40) >= (rectangle.getX() + rectangle.getWidth())) { //Karaktären kommer från vänster.
+                        character.setX((rectangle.getX() + rectangle.getWidth()) - 22);
+                    }
+                }
+            }
+            if (isOnGround) {
+                character.setCurrentState(Character.JumpState.STATIONARY);
+                character.setSpeedY(0);
+            } else {
+                character.setCurrentState(Character.JumpState.DESCENDING);
+            }
         }
     }
 
