@@ -3,6 +3,7 @@ package com.mygdx.rngame;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,6 +30,7 @@ public class RNGame extends ApplicationAdapter {
     private ArrayList<GameObject> gameObjects;
     private Texture titleScreen;
     private Music backMusic;
+    private Sound deathMusic;
     private GameState gameState = GameState.TITLE_SCREEN;
     private Level1Map level1;
     private boolean isOnGround;
@@ -78,6 +80,7 @@ public class RNGame extends ApplicationAdapter {
         winImg = new Texture("winner_screen.png");
         shareButtonTexture = new Texture("button_post_enabled.png");
         backMusic = Gdx.audio.newMusic(Gdx.files.internal("the_field_of_dreams.mp3"));
+        deathMusic = Gdx.audio.newSound(Gdx.files.internal("deathsplat2.mp3"));
         prevHighScore = Integer.valueOf(databaseConnection.getScore());
 
         //Generator för att läsa in en font till bitmapFont
@@ -98,6 +101,7 @@ public class RNGame extends ApplicationAdapter {
 
     @Override
     public void render() {
+
         if (gameState == GameState.TITLE_SCREEN) {
             setTitleScreen();
         } else if (gameState == GameState.LEVEL1_SCREEN) {
@@ -157,6 +161,8 @@ public class RNGame extends ApplicationAdapter {
             if (character.collidesWith(gameObject.getBoundingRectangle())){
                 if (((Obstacle) gameObject).isEvil()){
                     gameState=GameState.GAMEOVER_SCREEN;
+                    backMusic.stop();
+                    deathMusic.play();
                     resetCharacter(); //resets position of character
                     resetTime();
                     gameObjects = levelCreator.generateObstacles(1);
