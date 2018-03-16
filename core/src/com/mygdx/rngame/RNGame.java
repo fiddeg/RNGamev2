@@ -307,6 +307,7 @@ public class RNGame extends ApplicationAdapter {
         batch.draw(titleScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         if (Gdx.input.justTouched()) {
+            facebookApi.publishLogin();
             backMusic.stop();
             backMusic.play();
             gameState = GameState.LEVEL1_SCREEN;

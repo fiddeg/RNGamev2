@@ -239,37 +239,44 @@ public class FacebookApi {
     }
 
     public void publishLogin() {
-        facebook.signIn(SignInMode.PUBLISH, permissionsPublish, new GDXFacebookCallback<SignInResult>() {
-
-            @Override
-            public void onSuccess(SignInResult result) {
-                Gdx.app.debug(CLASS_NAME, "SIGN IN (publish permissions): User logged in successfully.");
-
-                gainMoreUserInfo();
-
+        if (facebook != null) {
+            if (permissions == null) {
+                addBasicPermissions();
+                debug(CLASS_NAME +
+                        ": returned to signIn(SignInMode) from addBasicPermissions()");
             }
+            facebook.signIn(SignInMode.PUBLISH, permissionsPublish, new GDXFacebookCallback<SignInResult>() {
 
-            @Override
-            public void onCancel() {
-                Gdx.app.debug(CLASS_NAME, "SIGN IN (publish permissions): User canceled login process");
+                @Override
+                public void onSuccess(SignInResult result) {
+                    Gdx.app.debug(CLASS_NAME, "SIGN IN (publish permissions): User logged in successfully.");
+
+                    gainMoreUserInfo();
+
+                }
+
+                @Override
+                public void onCancel() {
+                    Gdx.app.debug(CLASS_NAME, "SIGN IN (publish permissions): User canceled login process");
 
 
-            }
+                }
 
-            @Override
-            public void onFail(Throwable t) {
-                Gdx.app.error(CLASS_NAME, "SIGN IN (publish permissions): Technical error occured:");
+                @Override
+                public void onFail(Throwable t) {
+                    Gdx.app.error(CLASS_NAME, "SIGN IN (publish permissions): Technical error occured:");
 
-                t.printStackTrace();
-            }
+                    t.printStackTrace();
+                }
 
-            @Override
-            public void onError(GDXFacebookError error) {
-                Gdx.app.error(CLASS_NAME, "SIGN IN (publish permissions): Error login: " + error.getErrorMessage());
+                @Override
+                public void onError(GDXFacebookError error) {
+                    Gdx.app.error(CLASS_NAME, "SIGN IN (publish permissions): Error login: " + error.getErrorMessage());
 
-            }
+                }
 
-        });
+            });
+        }
 
     }
 
@@ -320,8 +327,6 @@ public class FacebookApi {
     }
 
     public void sharePost() {
-
-        publishLogin();
 
         GDXFacebookGraphRequest request = new GDXFacebookGraphRequest().setNode("me/feed").useCurrentAccessToken();
         request.setMethod(Net.HttpMethods.POST);
